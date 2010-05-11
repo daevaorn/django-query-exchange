@@ -14,7 +14,8 @@ setup(
     url="http://github.com/daevaorn/django-query-exchange/",
 
     packages=[
-        'query_exchange'
+        'query_exchange',
+        'query_exchange.templatetags',
     ],
 
     description="Django application for handling GET query params for url creation",
