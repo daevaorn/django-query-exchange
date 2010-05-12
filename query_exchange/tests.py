@@ -19,6 +19,9 @@ request = Request({'b': [1, 2], 'c': [4]})
 
 __test__ = {
     'process_query': """
+        >>> process_query(request.GET)
+        'c=4&b=1&b=2'
+
         >>> process_query(request.GET, keep=['b'], add={'page': 3})
         'b=1&b=2&page=3'
 
@@ -46,6 +49,9 @@ __test__ = {
         >>> render('{% url_with_query test_url 1 keep "b" add page=3 %}')
         '/test_url/1/?b=1&b=2&page=3'
 
+        >>> render('{% url_with_query test_url 1 %}')
+        '/test_url/1/?c=4&b=1&b=2'
+
         >>> render('{% url_with_query test_url 1 exclude "c" add page=3 as saved_url %}{{ saved_url|safe }}')
         '/test_url/1/?b=1&b=2&page=3'
 
@@ -63,6 +69,10 @@ __test__ = {
 
         >>> render('{% with_query concrete_url keep "b" add page=3 %}')
         '/test_url/1/?b=1&b=2&page=3'
+
+        Passthrough all query params
+        >>> render('{% with_query concrete_url %}')
+        '/test_url/1/?c=4&b=1&b=2'
 
         This exists query string in base url
         >>> render('{% with_query "/test_url/1/?d=5" keep "b","d" add page=3 %}')

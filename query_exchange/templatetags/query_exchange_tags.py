@@ -10,19 +10,20 @@ class BaseQueryNode(object):
     def render(self, context):
         url, extra_params = self.get_url(context)
 
-        if self.keep or self.exclude or self.add:
-            if 'request' not in context:
-                raise ValueError('`request` needed in context for GET query processing')
+        if 'request' not in context:
+            raise ValueError('`request` needed in context for GET query processing')
 
-            params = MultiValueDict(context['request'].GET.iterlists())
-            params.update(MultiValueDict(extra_params))
+        params = MultiValueDict(context['request'].GET.iterlists())
+        params.update(MultiValueDict(extra_params))
 
-            url += '?' + process_query(
-                params,
-                self.keep and [v.resolve(context) for v in self.keep],
-                self.exclude and [v.resolve(context) for v in self.exclude],
-                self.add and dict([(k, v.resolve(context)) for k, v in self.add.iteritems()])
-            )
+        query = process_query(
+            params,
+            self.keep and [v.resolve(context) for v in self.keep],
+            self.exclude and [v.resolve(context) for v in self.exclude],
+            self.add and dict([(k, v.resolve(context)) for k, v in self.add.iteritems()]),
+        )
+        if query:
+            url += '?' + query
 
         if self._asvar:
             context[self._asvar] = url
@@ -53,7 +54,7 @@ class WithQueryNode(BaseQueryNode, template.Node):
 
     def get_url(self, context):
         from cgi import parse_qs
-        
+
         url = self.url.resolve(context)
         if '?' in url:
             url, params = url.split('?', 1)
