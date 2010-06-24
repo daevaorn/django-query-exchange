@@ -1,10 +1,19 @@
+import re
+
 from django import template
 from django.utils.datastructures import MultiValueDict
-from django.template.defaulttags import URLNode, url_arg_re
+from django.template.defaulttags import URLNode
 
 from query_exchange import process_query
 
 register = template.Library()
+
+# Regex for URL arguments including filters
+url_arg_re = re.compile(
+    r"(?:(%(name)s)=)?(%(value)s(?:\|%(name)s(?::%(value)s)?)*)" % {
+        'name':'\w+',
+        'value':'''(?:(?:'[^']*')|(?:"[^"]*")|(?:[\w\.-]+))'''},
+    re.VERBOSE)
 
 class BaseQueryNode(object):
     def render(self, context):
