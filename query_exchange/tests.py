@@ -46,16 +46,16 @@ __test__ = {
         ...     ''' % line)
         ...     return tmpl.render(Context({'request': request})).strip().encode('utf-8')
 
-        >>> render('{% url_with_query test_url 1 keep "b" add page=3 %}')
+        >>> render('{% url_with_query "test_url" 1 keep "b" add page=3 %}')
         '/test_url/1/?b=1&b=2&page=3'
 
-        >>> render('{% url_with_query test_url 1 %}')
+        >>> render('{% url_with_query "test_url" 1 %}')
         '/test_url/1/?c=4&b=1&b=2'
 
-        >>> render('{% url_with_query test_url 1 exclude "c" add page=3 as saved_url %}{{ saved_url|safe }}')
+        >>> render('{% url_with_query "test_url" 1 exclude "c" add page=3 as saved_url %}{{ saved_url|safe }}')
         '/test_url/1/?b=1&b=2&page=3'
 
-        >>> render('{% url_with_query test_url 1 add page=3 %}')
+        >>> render('{% url_with_query "test_url" 1 add page=3 %}')
         '/test_url/1/?c=4&b=1&b=2&page=3'
 
     """,

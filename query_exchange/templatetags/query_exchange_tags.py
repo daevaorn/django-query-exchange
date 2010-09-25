@@ -50,6 +50,8 @@ class URLWithQueryNode(BaseQueryNode, URLNode):
         self.add = add
 
     def get_url(self, context):
+        self.view_name = self.view_name.resolve(context)
+
         return URLNode.render(self, context), {}
 
 class WithQueryNode(BaseQueryNode, template.Node):
@@ -98,7 +100,7 @@ def url_with_query(parser, token):
     if len(bits) < 2:
         raise template.TemplateSyntaxError("'%s' takes at least one argument"
                                            " (path to a view)" % bits[0])
-    viewname = bits[1]
+    viewname = parser.compile_filter(bits[1])
     args = []
     kwargs = {}
     asvar = None
