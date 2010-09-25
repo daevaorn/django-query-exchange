@@ -50,7 +50,10 @@ class URLWithQueryNode(BaseQueryNode, URLNode):
         self.add = add
 
     def get_url(self, context):
-        self.view_name = self.view_name.resolve(context)
+        try:
+            self.view_name = self.view_name.resolve(context)
+        except AttributeError:
+            pass
 
         return URLNode.render(self, context), {}
 
