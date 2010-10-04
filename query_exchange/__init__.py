@@ -1,6 +1,6 @@
-from urllib import urlencode
-
+from django.utils.http import urlencode
 from django.core.urlresolvers import reverse
+
 
 def reverse_with_query(viewname, urlconf=None, args=None, kwargs=None, prefix=None, current_app=None,
                        params=None, keep=None, exclude=None, add=None):
@@ -10,6 +10,7 @@ def reverse_with_query(viewname, urlconf=None, args=None, kwargs=None, prefix=No
         url += '?' + process_query(params, keep, exclude, add)
 
     return url
+
 
 def process_query(params, keep=None, exclude=None, add=None):
     if hasattr(params, 'iterlists'):
