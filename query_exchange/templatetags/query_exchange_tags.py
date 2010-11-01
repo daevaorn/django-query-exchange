@@ -3,6 +3,7 @@ import re
 from django import template
 from django.utils.datastructures import MultiValueDict
 from django.template.defaulttags import URLNode
+from django.utils.html import escape
 
 from query_exchange import process_query
 
@@ -33,6 +34,8 @@ class BaseQueryNode(object):
         )
         if query:
             url += '?' + query
+
+        url = escape(url)
 
         if self._asvar:
             context[self._asvar] = url
