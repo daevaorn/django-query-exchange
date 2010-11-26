@@ -14,7 +14,7 @@ def reverse_with_query(viewname, urlconf=None, args=None, kwargs=None, prefix=No
 
 def process_query(params, keep=None, exclude=None, add=None):
     if hasattr(params, 'iterlists'):
-        data = dict(params.iterlists())
+        data = dict((k, v[:]) for k, v in params.iterlists())
     else:
         data = dict((k, isinstance(v, list) and v or [v]) for k, v in params.iteritems())
 
@@ -25,8 +25,14 @@ def process_query(params, keep=None, exclude=None, add=None):
 
     if add:
         if hasattr(add, 'iterlists'):
-            data.update(dict(add.iterlists()))
+            add_dict = dict((k, v[:]) for k, v in add.iterlists())
         else:
-            data.update(dict([(k, [v]) for k, v in add.iteritems()]))
+            add_dict = dict([(k, [v]) for k, v in add.iteritems()])
+
+        for k, v in add_dict.iteritems():
+            if k in data and k in keep:
+                data[k].extend(v)
+            else:
+                data[k] = v
 
     return urlencode([(k, v) for k, l in data.iteritems() for v in l])

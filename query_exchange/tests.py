@@ -33,6 +33,9 @@ __test__ = {
 
         >>> process_query(request.GET)
         'c=4&b=1&b=2'
+
+        >>> process_query(request.GET, keep=['c'], add={'c': 5}, exclude=['b'])
+        'c=4&c=5'
     """,
     'reverse_with_query': """
         >>> reverse_with_query('test_url', args=(1,), params=request.GET, keep=['b'], add={'page': 3})
