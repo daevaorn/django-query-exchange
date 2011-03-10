@@ -18,6 +18,9 @@ def process_query(params, keep=None, exclude=None, add=None):
     else:
         data = dict((k, isinstance(v, list) and v or [v]) for k, v in params.iteritems())
 
+    keep = keep or []
+    exclude = exclude or []
+
     if keep:
         data = dict([(k, v) for k, v in data.iteritems() if k in keep])
     elif exclude:
