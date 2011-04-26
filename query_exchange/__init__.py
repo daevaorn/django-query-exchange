@@ -1,5 +1,6 @@
 from django.utils.http import urlencode
 from django.core.urlresolvers import reverse
+from django.utils.itercompat import is_iterable
 
 
 def reverse_with_query(viewname, urlconf=None, args=None, kwargs=None, prefix=None, current_app=None,
@@ -13,31 +14,34 @@ def reverse_with_query(viewname, urlconf=None, args=None, kwargs=None, prefix=No
 
 
 def process_query(params, keep=None, exclude=None, add=None):
-    if hasattr(params, 'iterlists'):
-        data = dict((k, v[:]) for k, v in params.iterlists())
-    else:
-        data = dict((k, isinstance(v, list) and v or [v]) for k, v in params.iteritems())
+    data = dict(_extranct_items(params))
 
     keep = keep or []
     exclude = exclude or []
 
     if keep:
-        data = dict([(k, v) for k, v in data.iteritems() if k in keep])
+        data = dict((k, data[k]) for k in keep if k in data)
     elif exclude:
-        data = dict([(k, v) for k, v in data.iteritems() if k not in exclude])
+        for k in exclude:
+            data.pop(k, None)
 
     if add:
-        if hasattr(add, 'iterlists'):
-            add_dict = dict((k, v[:]) for k, v in add.iterlists())
-        elif hasattr(add, 'iteritems'):
-            add_dict = dict([(k, [v]) for k, v in add.iteritems()])
-        else:
-            add_dict = dict([(k, [v]) for k, v in add])
+        add = dict(_extranct_items(add))
 
-        for k, v in add_dict.iteritems():
-            if k in data and k in keep:
+        for k, v in add.iteritems():
+            if k in data and (not keep or k in keep):
                 data[k].extend(v)
             else:
                 data[k] = v
 
     return urlencode([(k, v) for k, l in sorted(data.iteritems()) for v in l])
+
+
+def _extranct_items(iterable):
+    if hasattr(iterable, 'iterlists'):
+        return ((k, v[:]) for k, v in iterable.iterlists())
+
+    return ((k, is_iterable(v) and list(v) or [v])
+                for k, v in (iterable.iteritems()
+                             if hasattr(iterable, 'iteritems')
+                             else iterable))
