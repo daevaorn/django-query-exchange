@@ -20,19 +20,19 @@ request = Request({'b': [1, 2], 'c': [4]})
 __test__ = {
     'process_query': """
         >>> process_query(request.GET)
-        'c=4&b=1&b=2'
+        'b=1&b=2&c=4'
 
         >>> process_query(request.GET, keep=['b'], add={'page': 3})
         'b=1&b=2&page=3'
 
         >>> process_query(request.GET, add={'page': 3})
-        'c=4&b=1&b=2&page=3'
+        'b=1&b=2&c=4&page=3'
 
         >>> process_query(request.GET, exclude=['b'], add={'page': 3})
         'c=4&page=3'
 
         >>> process_query(request.GET)
-        'c=4&b=1&b=2'
+        'b=1&b=2&c=4'
 
         >>> process_query(request.GET, keep=['c'], add={'c': 5}, exclude=['b'])
         'c=4&c=5'
@@ -53,13 +53,13 @@ __test__ = {
         '/test_url/1/?b=1&amp;b=2&amp;page=3'
 
         >>> render('{% url_with_query "test_url" 1 %}')
-        '/test_url/1/?c=4&amp;b=1&amp;b=2'
+        '/test_url/1/?b=1&amp;b=2&amp;c=4'
 
         >>> render('{% url_with_query "test_url" 1 exclude "c" add page=3 as saved_url %}{{ saved_url|safe }}')
         '/test_url/1/?b=1&amp;b=2&amp;page=3'
 
         >>> render('{% url_with_query "test_url" 1 add page=3 %}')
-        '/test_url/1/?c=4&amp;b=1&amp;b=2&amp;page=3'
+        '/test_url/1/?b=1&amp;b=2&amp;c=4&amp;page=3'
 
     """,
     'with_query': """
@@ -75,7 +75,7 @@ __test__ = {
 
         Passthrough all query params
         >>> render('{% with_query concrete_url %}')
-        '/test_url/1/?c=4&amp;b=1&amp;b=2'
+        '/test_url/1/?b=1&amp;b=2&amp;c=4'
 
         This exists query string in base url
         >>> render('{% with_query "/test_url/1/?d=5" keep "b","d" add page=3 %}')
