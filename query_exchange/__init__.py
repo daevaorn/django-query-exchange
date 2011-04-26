@@ -29,8 +29,10 @@ def process_query(params, keep=None, exclude=None, add=None):
     if add:
         if hasattr(add, 'iterlists'):
             add_dict = dict((k, v[:]) for k, v in add.iterlists())
-        else:
+        elif hasattr(add, 'iteritems'):
             add_dict = dict([(k, [v]) for k, v in add.iteritems()])
+        else:
+            add_dict = dict([(k, [v]) for k, v in add])
 
         for k, v in add_dict.iteritems():
             if k in data and k in keep:
