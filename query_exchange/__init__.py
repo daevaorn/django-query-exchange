@@ -40,4 +40,4 @@ def process_query(params, keep=None, exclude=None, add=None):
             else:
                 data[k] = v
 
-    return urlencode([(k, v) for k, l in data.iteritems() for v in l])
+    return urlencode([(k, v) for k, l in sorted(data.iteritems()) for v in l])
