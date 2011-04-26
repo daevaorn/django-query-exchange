@@ -6,7 +6,7 @@ def reverse_with_query(viewname, urlconf=None, args=None, kwargs=None, prefix=No
                        params=None, keep=None, exclude=None, add=None):
     url = reverse(viewname, urlconf, args, kwargs, prefix, current_app)
 
-    if params:
+    if params is not None:
         url += '?' + process_query(params, keep, exclude, add)
 
     return url

@@ -40,6 +40,9 @@ __test__ = {
     'reverse_with_query': """
         >>> reverse_with_query('test_url', args=(1,), params=request.GET, keep=['b'], add={'page': 3})
         '/test_url/1/?b=1&b=2&page=3'
+        >>> reverse_with_query('test_url', args=(1,), params={}, add={'page': 3})
+        '/test_url/1/?page=3'
+
     """,
     'url_with_query': """
         >>> def render(line):
