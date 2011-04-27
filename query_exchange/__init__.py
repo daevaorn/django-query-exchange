@@ -29,7 +29,7 @@ def process_query(params, keep=None, exclude=None, add=None):
         add = dict(_extranct_items(add))
 
         for k, v in add.iteritems():
-            if k in data and (not keep or k in keep):
+            if k in data and keep and k in keep:
                 data[k].extend(v)
             else:
                 data[k] = v
@@ -37,11 +37,15 @@ def process_query(params, keep=None, exclude=None, add=None):
     return urlencode([(k, v) for k, l in sorted(data.iteritems()) for v in l])
 
 
+def _is_iterable(iterable):
+    return not isinstance(iterable, basestring) and is_iterable(iterable)
+
+
 def _extranct_items(iterable):
     if hasattr(iterable, 'iterlists'):
         return ((k, v[:]) for k, v in iterable.iterlists())
 
-    return ((k, is_iterable(v) and list(v) or [v])
+    return ((k, _is_iterable(v) and list(v) or [v])
                 for k, v in (iterable.iteritems()
                              if hasattr(iterable, 'iteritems')
                              else iterable))
