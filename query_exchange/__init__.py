@@ -14,7 +14,7 @@ def reverse_with_query(viewname, urlconf=None, args=None, kwargs=None, prefix=No
 
 
 def process_query(params, keep=None, exclude=None, add=None):
-    data = dict(_extranct_items(params))
+    data = dict(_extract_items(params))
 
     keep = keep or []
     exclude = exclude or []
@@ -26,7 +26,7 @@ def process_query(params, keep=None, exclude=None, add=None):
             data.pop(k, None)
 
     if add:
-        add = dict(_extranct_items(add))
+        add = dict(_extract_items(add))
 
         for k, v in add.iteritems():
             if k in data and keep and k in keep:
@@ -41,7 +41,7 @@ def _is_iterable(iterable):
     return not isinstance(iterable, basestring) and is_iterable(iterable)
 
 
-def _extranct_items(iterable):
+def _extract_items(iterable):
     if hasattr(iterable, 'iterlists'):
         return ((k, v[:]) for k, v in iterable.iterlists())
 
