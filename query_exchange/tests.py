@@ -36,8 +36,12 @@ __test__ = {
 
         >>> process_query(request.GET, keep=['c'], add={'c': 5}, exclude=['b'])
         'c=4&c=5'
+
         >>> process_query(request.GET, add={'c': 'foobar'}, exclude=['b'])
         'c=foobar'
+
+        >>> process_query(request.GET, keep=['b', 'c'], remove={'b': 1})
+        'b=2&c=4'
     """,
     'reverse_with_query': """
         >>> reverse_with_query('test_url', args=(1,), params=request.GET, keep=['b'], add={'page': 3})
@@ -66,6 +70,12 @@ __test__ = {
         >>> render('{% url_with_query "test_url" 1 add page=3 %}')
         '/test_url/1/?b=1&amp;b=2&amp;c=4&amp;page=3'
 
+        >>> render('{% url_with_query "test_url" 1 remove b=1 %}')
+        '/test_url/1/?b=2&amp;c=4'
+
+        >>> render('{% url_with_query "test_url" 1 keep "b","c" remove b=2 add page=3 %}')
+        '/test_url/1/?b=1&amp;c=4&amp;page=3'
+
     """,
     'with_query': """
         >>> def render(line):
@@ -85,5 +95,7 @@ __test__ = {
         This exists query string in base url
         >>> render('{% with_query "/test_url/1/?d=5" keep "b","d" add page=3 %}')
         '/test_url/1/?b=1&amp;b=2&amp;d=5&amp;page=3'
+        >>> render('{% with_query "/test_url/1/?d=5" keep "b","d" remove b=2 add page=3 %}')
+        '/test_url/1/?b=1&amp;d=5&amp;page=3'
     """
 }
