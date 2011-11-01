@@ -1,4 +1,5 @@
 import re
+from cgi import parse_qs
 
 from django import template
 from django.utils.datastructures import MultiValueDict
@@ -16,15 +17,13 @@ url_arg_re = re.compile(
         'value':'''(?:(?:'[^']*')|(?:"[^"]*")|(?:[\w\.-]+))'''},
     re.VERBOSE)
 
+
 class BaseQueryNode(object):
     def render(self, context):
-        url, extra_params = self.get_url(context)
+        url, params = self.get_url(context)
 
         if 'request' not in context:
             raise ValueError('`request` needed in context for GET query processing')
-
-        params = MultiValueDict(context['request'].GET.iterlists())
-        params.update(MultiValueDict(extra_params))
 
         query = process_query(
             params,
@@ -60,7 +59,7 @@ class URLWithQueryNode(BaseQueryNode, URLNode):
         except AttributeError:
             pass
 
-        return URLNode.render(self, context), {}
+        return URLNode.render(self, context), context['request'].GET.copy()
 
 class WithQueryNode(BaseQueryNode, template.Node):
     def __init__(self, url, asvar, keep, exclude, add, remove):
@@ -73,15 +72,36 @@ class WithQueryNode(BaseQueryNode, template.Node):
         self.remove = remove
 
     def get_url(self, context):
-        from cgi import parse_qs
+        params =  context['request'].GET.copy()
 
+        url = self.url.resolve(context)
+
+        if '?' in url:
+            url, exctra_params = url.split('?', 1)
+
+            params.update(MultiValueDict(parse_qs(exctra_params.encode('utf-8'))))
+
+        return url, params
+
+
+class QueryNode(BaseQueryNode, template.Node):
+    def __init__(self, asvar, keep, exclude, add, remove):
+        self._asvar = asvar
+
+        self.keep = keep
+        self.exclude = exclude
+        self.add = add
+        self.remove = remove
+
+    def get_url(self, context):
         url = self.url.resolve(context)
         if '?' in url:
             url, params = url.split('?', 1)
 
-            return url, parse_qs(params)
+            return url, MultiValueDict(parse_qs(params.encode('utf-8')))
 
-        return url, {}
+        return url, MultiValueDict()
+
 
 def parse_args(parser, bit):
     end = 0
@@ -92,12 +112,15 @@ def parse_args(parser, bit):
         if (i == 0 and match.start() != 0) or \
               (i > 0 and (bit[end:match.start()] != ',')):
             raise template.TemplateSyntaxError("Malformed arguments to url tag")
+
         end = match.end()
         name, value = match.group(1), match.group(2)
+
         if name:
             kwargs[name] = parser.compile_filter(value)
         else:
             args.append(parser.compile_filter(value))
+
     if end != len(bit):
         raise template.TemplateSyntaxError("Malformed arguments to url tag")
 
@@ -144,7 +167,7 @@ def with_query(parser, token):
     bits = token.split_contents()
     if len(bits) < 2:
         raise template.TemplateSyntaxError("'%s' takes at least one argument"
-                                           " (path to a view)" % bits[0])
+                                           " (url)" % bits[0])
     url = parser.compile_filter(bits[1])
     asvar = None
 
@@ -169,3 +192,34 @@ def with_query(parser, token):
                 _, remove = parse_args(parser, bits.next())
 
     return WithQueryNode(url, asvar, keep, exclude, add, remove)
+
+
+@register.tag
+def query(parser, token):
+    bits = token.split_contents()
+    if len(bits) < 2:
+        raise template.TemplateSyntaxError("'%s' takes at least some arguments" % bits[0])
+
+    asvar = None
+
+    keep = None
+    exclude = None
+    add = None
+    remove = None
+
+    bits = iter(bits[2:])
+
+    for bit in bits:
+        if bit == 'as':
+            asvar = bits.next()
+            break
+        elif bit == 'keep':
+            keep, _ = parse_args(parser, bits.next())
+        elif bit == 'exclude':
+            exclude, _ = parse_args(parser, bits.next())
+        elif bit == 'remove':
+            remove, _ = parse_args(parser, bits.next())
+        elif bit == 'add':
+            _, add = parse_args(parser, bits.next())
+
+    return QueryNode(asvar, keep, exclude, add, remove)
