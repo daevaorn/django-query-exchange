@@ -4,7 +4,7 @@ from django.core.management import call_command
 
 settings.configure(
     INSTALLED_APPS=('query_exchange',),
-    DATABASES={'default':{'ENGINE': 'sqlite3'}},
+    DATABASES={'default':{'ENGINE': 'django.db.backends.sqlite3'}},
     ROOT_URLCONF='query_exchange.tests'
 )
 
