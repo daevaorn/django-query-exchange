@@ -4,7 +4,7 @@ from distutils.core import setup
 
 setup(
     name="django-query-exchange",
-    version="0.1",
+    version="0.5",
 
     license="New BSD License",
 
